@@ -1,0 +1,278 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Box2D Mouse</title>
+
+<script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+<script>var zon = true; // true for comments from zim code</script>
+<script src="https://d309knd7es5f10.cloudfront.net/zim_4.7.1.js"></script>
+
+<!-- physics libraries -->
+<script src="https://d309knd7es5f10.cloudfront.net/Box2dWeb-2.1.a.3.min.js"></script>
+<script src="physics_0.1.1.js"></script><!-- helper code for box2D -->
+<style type="text/css">
+	body{
+		background-color: #212121;
+	}
+</style>
+
+<script>
+
+var frame = new zim.Frame("fit", 1500, 1000, "#212121");
+frame.on("ready", function() {
+	zog("ready from ZIM Frame");
+
+	var stage = frame.stage;
+	var stageW = frame.width;
+	var stageH = frame.height;
+
+
+	var borders = {x:0, y:0, width:stageW, height:stageH};
+
+	// 2. make a new Physics object passing in the ZIM frame and borders
+	// it needs a frame so it can get scale to match the debug canvas
+	var physics = new zim.Physics(frame, borders,-10);
+
+	// EXTRA
+	// for custom Box2D you may want access to the b2World
+	// and scale that is used
+	// var world = physics.world;
+	// var scale = physics.scale;
+
+	// 3. alternatively remove any of the borders
+	// also borderTop, borderLeft, borderRight
+	// physics.remove(physics.borderBottom);
+
+	// INITIAL VARS
+	// here we specify width, height, radius
+	// so we can use both for Box2D shapes and ZIM shapes
+	var barW = 400;
+	var barH = 20;
+	var boxW = 50;
+	var boxH = 50;
+
+	// ANGLED BAR
+	// 4. create Box2D body assets specifying dynamic and other properties
+	// dynamic defaults to true and means the body will move
+	// here we set the bar to not be dynamic so it is fixed
+	// width, height, dynamic, friction, angular, density, restitution, maskBits, categoryBits
+	var barBody = physics.makeRectangle(barW-100, barH, false,0);
+	var barBody2 = physics.makeRectangle(barW-100, barH, false,0);
+    var barBodyleft = physics.makeRectangle(barW-150, barH, false,0);
+    var barBodyright = physics.makeRectangle(barW-150, barH,false,0);
+    var barBodyTop1 = physics.makeRectangle(barW-210, barH, false,0);
+	var barBodyTop2 = physics.makeRectangle(barW-210, barH, false,0);
+	var barBodyTop3 = physics.makeRectangle(barW-210, barH, false,0);
+	var barBodyTop4 = physics.makeRectangle(barW-210, barH, false,0);
+
+	// 5. position and rotate the bodies (only at start)
+	barBody.x = 515;
+	barBody.y = 605;
+	barBody.rotation = 45;
+
+	barBody2.x = 925;
+	barBody2.y = 605;
+	barBody2.rotation = 135;
+
+	barBodyleft.x = 402;
+	barBodyleft.y = 370;
+	barBodyleft.rotation = 90;
+
+	barBodyright.x = 1038;
+	barBodyright.y = 370;
+	barBodyright.rotation = 90;
+
+	barBodyTop1.x = 480;
+	barBodyTop1.y = 210;
+	barBodyTop1.rotation = 152;
+
+	barBodyTop2.x = 960;
+	barBodyTop2.y = 210;
+	barBodyTop2.rotation = 28;
+
+	barBodyTop3.x = 640;
+	barBodyTop3.y = 210;
+	barBodyTop3.rotation = 28;
+
+	barBodyTop4.x = 800;
+	barBodyTop4.y = 210;
+	barBodyTop4.rotation = 152;
+
+
+
+	// 8. create ZIM assets to match physics world
+	// Box2D bodies (made by physics.js) have centered positions
+	// so center the registration points for ZIM assets
+	var bar = new zim.Rectangle(barW-100, barH, "#212121");
+	bar.centerReg(stage);
+	
+	var bar2 = new zim.Rectangle(barW-100, barH, "#212121");
+	bar2.centerReg(stage);
+ 
+    var barleft = new zim.Rectangle(barW-150, barH,  "#212121");
+	barleft.centerReg(stage);
+
+	var barright = new zim.Rectangle(barW-150, barH, "#212121");
+	barright.centerReg(stage);
+
+	var barTop1 = new zim.Rectangle(barW-210, barH, "#212121");
+	barTop1.centerReg(stage);
+	
+	var barTop2 = new zim.Rectangle(barW-210, barH,  "#212121");
+	barTop2.centerReg(stage);
+
+	var barTop3 = new zim.Rectangle(barW-210, barH, "#212121");
+	barTop3.centerReg(stage);
+	
+	var barTop4 = new zim.Rectangle(barW-210, barH,  "#212121");
+	barTop4.centerReg(stage);
+	
+	
+
+	// MAPPING
+	// 9. map the ZIM assets to the Box2D assets
+	// this puts the ZIM assets on the Box2D assets
+	// and rotates them to the same rotation
+	
+	physics.addMap(barBody, bar);
+	physics.addMap(barBody2, bar2);
+	physics.addMap(barBodyleft, barleft);
+	physics.addMap(barBodyright, barright);
+	physics.addMap(barBodyTop1, barTop1);
+	physics.addMap(barBodyTop2, barTop2);
+	physics.addMap(barBodyTop3, barTop3);
+	physics.addMap(barBodyTop4, barTop4);
+	//physics.addMap(boxBody, box);
+
+
+///////////////////////////////Ziqin's part start
+/////////////////////////create the hearts and 
+	// load heart assets with Frame.loadAssets
+	// var assetPath = "assets";
+	var heart = frame.loadAssets("assets/heart.png");
+
+
+	//hearts arry
+	var hearts = [];
+	frame.on("assetload", function(e){
+		// load in the hearts into an array
+		hearts.push(e.asset);
+		
+
+		//////create a container for hearts
+		var heartsContainer = new zim.Container(stageW,stageH);
+		heartsContainer.addTo(stage);
+
+
+		//once one heart is in the array start the app
+		// add the asset to the heart list
+		// and if this is the first asset, it goes through to start the app
+		// otherwise if it is a subsequent heart it exits the function
+		if (hearts.length>1) return;
+
+		// define the borders
+
+		var borders = {x:0, y:0, width:stageW, height:stageH};
+
+		// make a physics.World and pass in the frame and borders
+		//var physics = new zim.Physics(frame, borders, -1);
+		var world = physics.world;
+		var scale = physics.scale;
+
+		// remove borders we do not need
+		physics.remove(physics.borderTop);
+		physics.remove(physics.borderBottom);
+		// physics.remove(physics.borderLeft);
+		// physics.remove(physics.borderRight);
+
+		//create a b2BuoyancyController with desired properties
+		var bc = new b2BuoyancyController();
+		bc.normal.Set(0,-1);
+		bc.offset = -stageH/2/physics.scale;
+		bc.density = 3;
+		bc.linearDrag = 3;
+		bc.angularDrag = 2;
+		world.AddController(bc);
+
+
+
+		// in an interval add a bunch of hearts
+		var gone = 0;
+		var count = 0;
+		var interval = setInterval(function() {
+			count++;
+			addHeart(zim.rand(520, stageW-520));
+			// if(count>75)clearInterval(interval);
+			
+		}, 300);
+
+		zim.Ticker.add(function(){
+			zim.loop(heartsContainer, function(heart){
+				if(heart.y < 50) {
+					physics.removeMap(heart.body, heart);
+					heartsContainer.removeChild(heart);
+					physics.world.DestroyBody(heart.body);
+					gone++;
+				} 
+				if(count-gone > 52) {
+					clearInterval(interval);
+				}
+			},true);
+		},stage);
+
+
+		var s = .5; // heart scale
+		var reduce = .6; // make hit area a little smaller
+		function addHeart(loc) {
+			var ing = zim.shuffle(hearts)[0].clone();
+
+			//based on the heart, make a physics Box2D body
+			var body = physics.makeCircle(ing.width*s/2*reduce, true, 0, 2, 2, 0);
+			ing.body = body;
+			
+			// position and rotate the body
+			body.x = (typeof loc == "number") ? loc : stage.mouseX+zim.rand(-5,5);
+			body.y = stageH+100;
+			body.rotation = zim.rand(360);
+
+			// spin the body with an impulse force
+			// will push in the y direction a random positive or negative force
+			// that is between 5 and 10 and 600 off to the side
+			// this is because this version of Box2D does not have impulseTorque
+			var force = (zim.rand(1)==0?1:-1)*zim.rand(5,10);
+			body.ApplyImpulse(new b2Vec2(0,force), body.GetWorldPoint(new b2Vec2(600,600)));
+
+			// add the centerReg ZIM heart to the food container
+			// note that zim.scale returns the object being scaled
+			ing.scale(s).centerReg(heartsContainer);
+
+			// map the ZIM heart to the Box2D body
+			physics.addMap(body, ing);
+
+			
+			ing.cursor = "pointer";
+		}//end of addHeart
+
+		physics.drag();
+
+		//DEBUG
+		// optionally see the BOX 2D debug canvas - uncomment below
+		// physics.debug();
+		// frame.on("resize", function() {
+		// 	physics.updateDebug();
+		// });
+///////////////////////////////Ziqin's part end
+	}); 
+
+
+
+	stage.update();
+});
+
+</script>
+</head>
+
+<body>
+</body>
+</html>
